@@ -1,0 +1,15 @@
+{
+  "provider": "Google Gemini",
+  "model": "gemini-pro",
+  "prompt": "Plan a 7-day diverse weekly meal plan.",
+  "llm_output": {
+    "Mon": "Chickpea Curry with Rice",
+    "Tue": "Paneer Stir-Fry with Roti",
+    "Wed": "Vegetable Pasta",
+    "Thu": "Grilled Chicken Salad",
+    "Fri": "Tomato Soup with Garlic Bread",
+    "Sat": "Omelette & Toast",
+    "Sun": "Veg Biryani"
+  },
+  "notes": "Save this real run output for judges to inspect."
+}
