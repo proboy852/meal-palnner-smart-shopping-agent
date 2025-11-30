@@ -1,15 +1,15 @@
 {
-  "provider": "Google Gemini",
-  "model": "gemini-pro",
-  "prompt": "Plan a 7-day diverse weekly meal plan.",
-  "llm_output": {
-    "Mon": "Chickpea Curry with Rice",
-    "Tue": "Paneer Stir-Fry with Roti",
-    "Wed": "Vegetable Pasta",
-    "Thu": "Grilled Chicken Salad",
-    "Fri": "Tomato Soup with Garlic Bread",
-    "Sat": "Omelette & Toast",
-    "Sun": "Veg Biryani"
+  "llm_mode": "mock-example",
+  "prompt_used": "Generate a balanced 7-day meal plan with no meal repeated more than twice and avoid onions. Use given recipe list.",
+  "llm_response": {
+    "Mon": "Veggie Pasta",
+    "Tue": "Grilled Chicken with Rice",
+    "Wed": "Tomato Soup with Bread",
+    "Thu": "Paneer Stir Fry with Rice",
+    "Fri": "Omelette & Toast",
+    "Sat": "Vegetable Curry",
+    "Sun": "Salad Bowl"
   },
-  "notes": "Save this real run output for judges to inspect."
+  "reasoning": "Selected meals to balance protein and vegetables, limited repetition and honored allergy/dislike.",
+  "note": "This is a mock LLM response to demonstrate expected output format when an LLM is enabled."
 }
