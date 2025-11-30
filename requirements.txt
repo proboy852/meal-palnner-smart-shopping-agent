@@ -1,4 +1,7 @@
-google-generativeai>=0.4.0
-pandas>=1.3.0
-requests>=2.25.1
-python-dotenv>=0.21.0
+{
+  "tomato_sauce": 100,
+  "spaghetti": 0,
+  "eggs": 2,
+  "rice": 200,
+  "potato": 100
+}
