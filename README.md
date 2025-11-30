@@ -20,3 +20,16 @@ python3 -m venv venv
 source venv/bin/activate      # or venv\Scripts\activate on Windows
 pip install -r requirements.txt
 python main.py
+
+## Example: Fallback Run (Offline)
+The project includes a fully offline deterministic fallback mode.
+
+Output saved at:
+`examples/fallback_run.txt`
+
+This demonstrates:
+- Meal planning agent
+- Validation agent with auto-correction
+- Ingredient extraction agent
+- Cost estimation agent
+- Final weekly grocery total
