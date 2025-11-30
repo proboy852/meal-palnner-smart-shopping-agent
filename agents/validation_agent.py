@@ -1,4 +1,5 @@
 import os
+import random
 
 USE_OPENAI = bool(os.getenv("OPENAI_API_KEY"))
 if USE_OPENAI:
@@ -6,50 +7,64 @@ if USE_OPENAI:
 
 class ValidationAgent:
     """
-    Validates:
-    - allergy conflicts
+    Validates the plan and tries to auto-fix simple problems:
     - repeated meals
     - vegetarian mismatch
+    - allergy conflicts
     """
 
-    def validate(self, plan, preferences):
-        if USE_OPENAI:
-            try:
-                prompt = f"""
-Check this weekly plan:
-
-{plan}
-
-Rules:
-- Avoid allergies: {preferences['allergies']}
-- Avoid disliked foods: {preferences['disliked']}
-- If vegetarian=true, no meat.
-- Avoid repeating the same meal more than twice.
-
-Return ONLY JSON:
-{{
- "valid": true/false,
- "problems": [...],
- "suggestion": {{}}
-}}
-"""
-
-                response = openai.ChatCompletion.create(
-                    model="gpt-3.5-turbo",
-                    messages=[{"role":"user","content":prompt}]
-                )
-                import json
-                return json.loads(response["choices"][0]["message"]["content"])
-            except:
-                pass
-
-        # fallback simple validator
+    def validate(self, plan, preferences, recipe_pool):
+        """
+        plan: dict day->meal
+        preferences: dict of preferences
+        recipe_pool: list of recipe dicts (with 'name' and 'tags')
+        """
         problems = []
+        suggestion = {}
+        # check repeats
         seen = {}
-
         for d, meal in plan.items():
             seen[meal] = seen.get(meal, 0) + 1
-            if seen[meal] > 2:
-                problems.append(f"Meal repeated too much: {meal}")
+        repeats = [m for m,c in seen.items() if c > 2]
+        if repeats:
+            problems.append(f"Meal repeated too much: {', '.join(repeats)}")
+            # build replacement list: choose recipes not repeated and respecting vegetarian/allergy
+            candidates = []
+            for r in recipe_pool:
+                if r["name"] in seen and seen[r["name"]] >= 2:
+                    continue
+                if preferences.get("vegetarian") and "vegetarian" not in r.get("tags", []):
+                    continue
+                candidates.append(r["name"])
+            # Suggest swaps: replace occurrences past the 2nd with candidates round-robin
+            swaps = {}
+            for rep in repeats:
+                # find days where rep appears after the second occurrence
+                days = [d for d,m in plan.items() if m == rep]
+                # keep first two, replace the rest
+                for replace_day in days[2:]:
+                    if not candidates:
+                        # fallback: random other recipe
+                        alt = random.choice([r["name"] for r in recipe_pool if r["name"] != rep])
+                    else:
+                        alt = candidates.pop(0)
+                    swaps[replace_day] = alt
+            suggestion["swaps"] = swaps
 
-        return {"valid": len(problems)==0, "problems": problems, "suggestion": {}}
+        # vegetarian / allergy simple check
+        if preferences.get("vegetarian"):
+            meat_seen = [m for m in plan.values() if "vegetarian" not in next((r for r in recipe_pool if r["name"]==m), {}).get("tags",[])]
+            if meat_seen:
+                problems.append("Plan contains non-vegetarian meals while vegetarian=true")
+                # suggestion: swap those days with vegetarian recipes
+                vegs = [r["name"] for r in recipe_pool if "vegetarian" in r.get("tags",[])]
+                swaps = suggestion.get("swaps",{})
+                i = 0
+                for d,m in list(plan.items()):
+                    if m in meat_seen:
+                        swaps[d] = vegs[i % len(vegs)] if vegs else swaps.get(d, m)
+                        i += 1
+                suggestion["swaps"] = swaps
+
+        valid = len(problems) == 0
+        return {"valid": valid, "problems": problems, "suggestion": suggestion}
