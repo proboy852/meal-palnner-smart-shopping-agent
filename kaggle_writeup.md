@@ -120,12 +120,7 @@ Using Gemini (optional):
 
 ---
 
-## 6. How to Run
-
-### **Offline Mode (works for all judges)**
-Uses rule-based fallback:
-```bash
-python main.py
+## 6. Run
 
 ### 7. Bonus & Extensions (Optional)
 
