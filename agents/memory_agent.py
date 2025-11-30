@@ -1,6 +1,5 @@
 import json
 from pathlib import Path
-
 MEMORY_FILE = Path("memory.json")
 
 class MemoryAgent:
@@ -8,6 +7,5 @@ class MemoryAgent:
         if MEMORY_FILE.exists():
             return json.loads(MEMORY_FILE.read_text())
         return {"history": [], "preferences": {}}
-
     def save(self, data):
         MEMORY_FILE.write_text(json.dumps(data, indent=2))
