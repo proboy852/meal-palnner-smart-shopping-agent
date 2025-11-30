@@ -23,15 +23,5 @@ carrot : 200
 onion : 100
 
 === Cost Table ===
-        item  qty  unit_price    store  est_cost
-   spaghetti  600        3.84 MockMart     23.04
-tomato_sauce  150        2.02 MockMart      3.03
-     chicken  400        4.78 MockMart     19.12
-   soy_sauce   40        2.49 MockMart      1.00
-     veg_mix  300        1.96 MockMart      5.88
-        rice    0        3.99 MockMart      3.99
-      potato  200        1.45 MockMart      2.90
-      carrot  200        4.29 MockMart      8.58
-       onion  100        4.04 MockMart      4.04
-
+... (the table output)
 Estimated total: 71.58
