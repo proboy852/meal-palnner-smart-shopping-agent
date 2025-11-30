@@ -1,174 +1,215 @@
-# SmartMeal — AI Meal Planner & Smart Shopping Agent
-
-**Track:** Concierge Agents  
-**Author:** (Your Name)  
-**GitHub Repo:** https://github.com/YOUR-USERNAME/meal-planner-smart-shopping-agent
+# 🧠 AI SmartMeal — Multi-Agent Weekly Meal Planner & Smart Grocery Optimizer  
+### Track: Concierge Agents
 
 ---
 
-## 1. Problem Statement
+## 🎯 Problem Overview  
+Weekly meal planning is time-consuming and mentally exhausting.  
+Users struggle with:
 
-Meal planning and grocery organization are repetitive tasks that consume time and energy.  
-People face several issues:
+- deciding what to cook every day  
+- managing dietary needs (vegetarian, allergies, dislikes)  
+- keeping track of pantry items  
+- minimizing grocery cost  
+- avoiding repeated meals  
+- planning a balanced weekly rotation  
 
-- Difficulty deciding meals for the week  
-- Forgetting items while shopping  
-- Buying duplicates due to poor pantry tracking  
-- Overspending because no price comparison is done  
-
-A simple multi-agent system can remove this burden and make weekly planning efficient.
-
----
-
-## 2. Solution Overview
-
-SmartMeal is a **three-agent sequential system**:
-
-### 🥗 **1. MealPlannerAgent**
-Creates a 7-day weekly meal plan based on:
-- User preferences  
-- Recipes  
-- Pantry items  
-- Allergies/dislikes  
-- Memory of past meal plans  
-
-### 🛒 **2. ShoppingListAgent**
-Converts the weekly meal plan into:
-- A complete shopping list  
-- Correct ingredient quantities  
-- Deducts items already available in pantry  
-
-### 💰 **3. PriceOptimizerAgent**
-Uses a **tool** to:
-- Estimate price for each item  
-- Provide alternative cost-friendly options  
-- Calculate total estimated shopping cost  
-
-This helps users:
-- Save time  
-- Reduce food waste  
-- Save money  
+This project demonstrates a **multi-agent system** that solves this end-to-end.
 
 ---
 
-## 3. Key Kaggle Requirements Implemented
+## 🤖 Multi-Agent Architecture  
 
-SmartMeal includes **more than 3** required AI agent concepts:
+### **1. Input Understanding Agent**  
+Extracts user preferences from messy text.  
+Example input:  
+> “I want cheap food, avoid onion, and include some vegetarian meals.”
 
-### ✔ **Sequential Agents**  
-(Agent 1 → Agent 2 → Agent 3)
+Result:
+```json
+{
+  "vegetarian": false,
+  "allergies": [],
+  "disliked": [],
+  "budget": "low"
+}
+2. Meal Planning Agent
+Plans a 7-day meal schedule.
 
-### ✔ **Tools**  
-Price lookup tool (mock price lookup or SerpAPI if enabled)
+Uses Google Gemini if an API key is available
 
-### ✔ **Memory**  
-- Pantry saved in `pantry.json`  
-- User preferences stored in `memory.json`  
-- Past meal history saved  
+Otherwise uses a deterministic fallback
 
-### ✔ **Context Engineering**  
-Agents use pantry + preferences to filter valid meals.
+Ensures no meal repeats more than once
 
-### ✔ **Agent Evaluation**  
-The system prints:
-- Meal plan  
-- Shopping list  
-- Estimated cost  
+Respects preferences like vegetarian or disliked items
 
----
+A real Gemini example is stored in:
 
-## 4. Architecture Diagram (Text Version)
-
-User Preferences + Pantry
-↓
-MealPlannerAgent
-↓
-Weekly Meal Plan (7 days)
-↓
-ShoppingListAgent
-↓
-List of Items Needed + Qty
-↓
-PriceOptimizerAgent (Tool)
-↓
-Cost Estimate + Store Suggestions
-
----
-
-## 5. Implementation Details
-
-The entire system is implemented in `main.py`.
-
-### Files:
-- `main.py` → Full agent pipeline  
-- `sample_data/pantry.json` → Pantry data  
-- `memory.json` → Created automatically  
-- `requirements.txt` → Dependencies  
-- `README.md` → Instructions  
-
-### Technology used:
-- Python 3  
-- Optional OpenAI (if API key added)  
-- Optional SerpAPI (if key added)  
-
-The default demo runs fully **offline** using mock data.
-
----
-
-## 6. Running the Project
-
-Install requirements (only needed if you want to run the code locally):
-
-pip install -r requirements.txt
-
-Run:
-
-python main.py
-
-yaml
+bash
 Copy code
+examples/llm_run.json
+and a fallback example is stored in:
 
-It will print:
+bash
+Copy code
+examples/fallback_run.txt
+3. Ingredient Extraction Agent
+For each meal, builds an ingredient list:
 
-1. Weekly meal plan  
-2. Aggregated shopping list  
-3. Estimated shopping cost  
+If meal is known: use database
 
----
+If unknown: Gemini infers ingredients (optional)
 
-## 7. Value & Impact
+Always works offline through fallback mode
 
-SmartMeal helps users:
+4. Shopping List Agent
+Aggregates ingredient quantities for the entire week.
 
-- Reduce time spent planning meals  
-- Stay organized  
-- Avoid unnecessary purchases  
-- Save money with cost optimization  
-- Reduce food waste  
-- Maintain consistent meal habits with history-based memory  
+Example output:
 
-Simple, effective, and very practical.
+diff
+Copy code
+- spaghetti: 600 g
+- tomato_sauce: 150 g
+- chicken: 400 g
+...
+5. Price Optimization Agent
+A tool-use agent that:
 
----
+Fetches real prices from SerpAPI (optional)
 
-## 8. Bonus Features (Optional)
+Otherwise uses mock price data
 
-- Add nutrition tracking  
-- Add real recipes using an API  
-- Add real supermarket prices  
-- Deploy as a web app  
-- Add voice control  
+Outputs estimated total grocery cost
 
----
+Example output is shown as a table (pandas DataFrame).
 
-## 9. Conclusion
+6. Validation Agent
+Checks for:
 
-SmartMeal is a practical, easy-to-run multi-agent system built using:
-- Sequential agents  
-- Tool usage  
-- Memory  
-- Context engineering  
+repeated meals
 
-It meets Kaggle’s Capstone submission requirements and provides real-world value in meal planning and grocery shopping.
+non-vegetarian meals (if vegetarian mode)
 
----
+allergy-triggering recipes
+
+Automatically fixes invalid plans by swapping meals intelligently.
+
+7. Memory Agent
+Stores:
+
+user preferences
+
+previously generated meal plans
+
+This enables personalization across sessions.
+
+🏗️ System Flow
+Parse user text → structured preferences
+
+Generate weekly meal plan
+
+Validate + auto-correct
+
+Extract ingredients
+
+Build shopping list
+
+Estimate grocery cost
+
+Save memory
+
+📄 Example Outputs
+Fallback Mode (Always Works Offline)
+A full fallback example is included in:
+
+bash
+Copy code
+examples/fallback_run.txt
+This ensures judges can run the project without API keys.
+
+Gemini LLM Mode (Optional)
+If GOOGLE_API_KEY is added, the system produces:
+
+more diverse meal plans
+
+improved ingredients
+
+smarter substitutions
+
+The real LLM output is saved in:
+
+bash
+Copy code
+examples/llm_run.json
+🔧 Implementation
+The system is structured as:
+
+css
+Copy code
+agents/
+    input_agent.py
+    meal_agent.py
+    list_agent.py
+    price_agent.py
+    validation_agent.py
+    memory_agent.py
+tools/
+    price_lookup.py
+examples/
+    fallback_run.txt
+    llm_run.json
+main.py
+requirements.txt
+README.md
+kaggle_writeup.md
+Runs offline, with optional LLM enhancements.
+
+🛠️ Running the Project
+Offline / Fallback Mode (recommended for judges)
+css
+Copy code
+python main.py
+Gemini LLM Mode
+Add environment variable:
+
+makefile
+Copy code
+GOOGLE_API_KEY=your_key_here
+python main.py
+💡 Why This Project Matters
+This project demonstrates:
+
+AI planning
+
+tool-use
+
+multi-agent reasoning
+
+memory
+
+validation and auto-correction
+
+cost optimization
+
+optional LLM integration
+
+It solves a real-world problem in a structured, reproducible way.
+
+🏁 Conclusion
+AI SmartMeal highlights how multi-agent systems can simplify complex daily routines.
+
+It successfully:
+
+generates meal plans
+
+validates and corrects them
+
+extracts ingredients
+
+optimizes cost
+
+supports both offline and AI-enhanced modes
+
+This fulfills the goals of the Concierge Agent Track and presents a complete, reproducible multi-agent pipeline.
