@@ -6,12 +6,14 @@ class PriceOptimizerAgent:
         rows = []
         total = 0.0
         for item, qty in shopping_list.items():
-            info = price_lookup(item)
-            unit_price = info.get("price", 1.0)
-            est = unit_price * (qty/100 if qty > 10 else 1)
+            p = price_lookup(item)
+            est = p["price"] * (qty / 100.0 if qty > 10 else 1.0)
             rows.append({
-                "item": item, "qty": qty, "unit_price": unit_price,
-                "store": info.get("store","MockMart"), "est_cost": round(est,2)
+                "item": item,
+                "qty": qty,
+                "unit_price": p["price"],
+                "store": p["store"],
+                "est_cost": round(est, 2)
             })
             total += est
-        return {"items": rows, "total_est": round(total,2), "table": pd.DataFrame(rows)}
+        return {"items": rows, "total_est": round(total, 2), "table": pd.DataFrame(rows)}
