@@ -1,54 +1,13 @@
 import os
-
-USE_OPENAI = bool(os.getenv("OPENAI_API_KEY"))
-if USE_OPENAI:
-    import openai
+USE_OPENAI = False  # not used if we use Gemini; kept for compatibility
 
 class InputUnderstandingAgent:
-    """
-    Converts messy user text into structured preferences:
-    {
-      "vegetarian": bool,
-      "allergies": [...],
-      "disliked": [...],
-      "budget": "low/medium/high"
-    }
-    """
-
     def parse_input(self, raw_text: str):
-        if USE_OPENAI:
-            try:
-                prompt = f"""
-You are an AI that converts messy human text into structured JSON
-about food preferences.
-
-User text:
-{raw_text}
-
-Return ONLY JSON like this:
-{{
- "vegetarian": true/false,
- "allergies": [...],
- "disliked": [...],
- "budget": "low" or "medium" or "high"
-}}
-"""
-
-                response = openai.ChatCompletion.create(
-                    model="gpt-3.5-turbo",
-                    messages=[{"role": "user", "content": prompt}]
-                )
-
-                import json
-                return json.loads(response["choices"][0]["message"]["content"])
-
-            except Exception:
-                pass
-
-        # Fallback without AI
+        # Simple parser fallback: returns default structured preferences
+        raw = (raw_text or "").lower()
         return {
-            "vegetarian": False,
+            "vegetarian": "vegetarian" in raw or "veg" in raw,
             "allergies": [],
             "disliked": [],
-            "budget": "medium"
+            "budget": "low" if "cheap" in raw or "low budget" in raw else "medium"
         }
