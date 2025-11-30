@@ -126,7 +126,8 @@ Using Gemini (optional):
 Uses rule-based fallback:
 ```bash
 python main.py
-## 7. Bonus & Extensions (Optional)
+
+### 7. Bonus & Extensions (Optional)
 
 This project can be extended in multiple directions:
 
@@ -153,7 +154,7 @@ This project can be extended in multiple directions:
 
 ---
 
-## 8. Reproducibility
+### 8. Reproducibility
 
 To ensure reproducibility for all judges:
 
@@ -176,7 +177,7 @@ To ensure reproducibility for all judges:
 
 ---
 
-## Conclusion
+### Conclusion
 
 SmartMeal is a practical, fully functioning **multi-agent system** that solves a real-world problem: weekly meal planning and grocery optimization.
 
