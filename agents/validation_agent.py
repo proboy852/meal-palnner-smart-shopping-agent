@@ -1,33 +1,52 @@
 import random
+import os
+
+USE_OPENAI = bool(os.getenv("OPENAI_API_KEY"))
+if USE_OPENAI:
+    import openai
 
 class ValidationAgent:
     def validate(self, plan, preferences, recipe_pool):
         problems = []
         suggestion = {}
         seen = {}
-        for day, meal in plan.items():
+        for d, meal in plan.items():
             seen[meal] = seen.get(meal, 0) + 1
-        repeats = [m for m,c in seen.items() if c > 2]
+        repeats = [m for m, c in seen.items() if c > 2]
         if repeats:
             problems.append(f"Meal repeated too much: {', '.join(repeats)}")
-            candidates = [r["name"] for r in recipe_pool if r["name"] not in repeats and (not preferences.get("vegetarian") or "vegetarian" in r.get("tags", []))]
+            # build replacements
+            candidates = []
+            for r in recipe_pool:
+                if r["name"] in seen and seen[r["name"]] >= 2:
+                    continue
+                if preferences.get("vegetarian") and "vegetarian" not in r.get("tags", []):
+                    continue
+                candidates.append(r["name"])
             swaps = {}
             for rep in repeats:
-                days = [d for d,m in plan.items() if m==rep]
+                days = [d for d, m in plan.items() if m == rep]
                 for replace_day in days[2:]:
-                    alt = candidates.pop(0) if candidates else random.choice([r["name"] for r in recipe_pool if r["name"]!=rep])
+                    if candidates:
+                        alt = candidates.pop(0)
+                    else:
+                        alt = random.choice([r["name"] for r in recipe_pool if r["name"] != rep])
                     swaps[replace_day] = alt
             suggestion["swaps"] = swaps
+
         # vegetarian check
         if preferences.get("vegetarian"):
-            nonveg = [d for d,m in plan.items() if "vegetarian" not in next((r for r in recipe_pool if r["name"]==m), {}).get("tags",[])]
+            nonveg = [m for m in plan.values() if not any("vegetarian" in r.get("tags", []) and r["name"]==m for r in recipe_pool)]
             if nonveg:
                 problems.append("Plan contains non-vegetarian meals while vegetarian=true")
                 vegs = [r["name"] for r in recipe_pool if "vegetarian" in r.get("tags",[])]
-                swaps = suggestion.get("swaps",{})
-                i=0
-                for d in nonveg:
-                    swaps[d] = vegs[i % len(vegs)] if vegs else swaps.get(d)
-                    i+=1
-                suggestion["swaps"]=swaps
-        return {"valid": len(problems)==0, "problems": problems, "suggestion": suggestion}
+                swaps = suggestion.get("swaps", {})
+                i = 0
+                for d, m in list(plan.items()):
+                    if m in nonveg:
+                        swaps[d] = vegs[i % len(vegs)] if vegs else swaps.get(d, m)
+                        i += 1
+                suggestion["swaps"] = swaps
+
+        valid = len(problems) == 0
+        return {"valid": valid, "problems": problems, "suggestion": suggestion}
